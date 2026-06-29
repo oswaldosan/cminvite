@@ -1,0 +1,33 @@
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;background:#06231C;color:#0B2A22;-webkit-font-smoothing:antialiased}
+input{font-family:inherit}
+button{font-family:inherit}
+[hidden]{display:none !important}
+
+@keyframes cmFadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes cmFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes cmDash{to{stroke-dashoffset:-1600}}
+@keyframes cmPlane{0%{offset-distance:0%}100%{offset-distance:100%}}
+@keyframes cmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes cmPop{0%{opacity:0;transform:scale(.9) translateY(18px)}60%{opacity:1}100%{opacity:1;transform:none}}
+
+.cm-fade-up{animation:cmFadeUp .7s cubic-bezier(.2,.7,.2,1) both}
+.cm-pop{animation:cmPop .55s cubic-bezier(.2,.7,.2,1) both}
+.cm-input:focus{border-color:#0C9BA3 !important;box-shadow:0 0 0 3px rgba(12,155,163,.12)}
+.cm-btn-primary:hover{filter:brightness(1.07)}
+.cm-btn-primary:active{transform:translateY(1px)}
+.cm-btn-ghost:hover{background:rgba(255,255,255,.2)}
+.cm-btn-outline:hover{background:rgba(255,255,255,.1)}
+.cm-btn-white:hover{filter:brightness(.96)}
+
+.cm-lang-btn{padding:6px 14px;border:none;border-radius:999px;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;font-size:12.5px;transition:background .18s,color .18s}
+.cm-lang-btn.active{background:#fff;color:#0E3B2A}
+.cm-lang-btn.idle{background:transparent;color:rgba(255,255,255,.8)}
+
+@media print{
+  .cm-noprint{display:none !important}
+  .cm-page{background:#fff !important}
+  .cm-pass-wrap{box-shadow:none !important}
+  body{background:#fff !important}
+}
