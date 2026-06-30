@@ -60,7 +60,7 @@ export const DICT = {
     boarding_title: "Your boarding pass is ready",
     boarding_sub: "Present it at the event entrance.",
     bp_title: "BOARDING PASS", bp_subtitle: "DIGITAL PASS",
-    bp_from_city: "Tegucigalpa", bp_to_city: "New CM era",
+    bp_from_city: "Tegucigalpa", bp_to_city: "New CM experience",
     bp_passenger: "Passenger", bp_flight: "Flight", bp_date: "Date", bp_boarding: "Boarding",
     bp_gate: "Gate", bp_seat: "Seat", bp_class: "Class", bp_class_v: "Cocktail",
     bp_terminal: "Terminal", bp_time: "Event", bp_seq: "Seq.",
