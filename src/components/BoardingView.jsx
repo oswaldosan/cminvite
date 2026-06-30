@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import BoardingPass from "./BoardingPass.jsx";
 import RsvpCards from "./RsvpCards.jsx";
-import { downloadIcs } from "../lib/guests.js";
+import { addToCalendar } from "../lib/guests.js";
 
 export default function BoardingView({ t, guest, onBack }) {
   const passRef = useRef(null);
@@ -135,7 +135,7 @@ export default function BoardingView({ t, guest, onBack }) {
         </button>
         <button
           type="button"
-          onClick={() => downloadIcs(t)}
+          onClick={() => addToCalendar(t)}
           className="cm-btn-ghost"
           style={{
             cursor: "pointer",
