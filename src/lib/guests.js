@@ -1,9 +1,8 @@
 import data from "../data/guests.json";
 
-const normalizeId = (s) =>
-  String(s || "")
-    .replace(/[^0-9a-zA-Z]/g, "")
-    .toLowerCase();
+// Canonical ID format is digits-only (e.g. "0502199200553").
+// Users may type dashes, spaces, dots, or any separator — we strip them.
+export const normalizeId = (s) => String(s || "").replace(/\D/g, "");
 
 export function findGuest(rawId) {
   const target = normalizeId(rawId);
