@@ -26,7 +26,6 @@ export default function RsvpCards({ t }) {
     <div className="cm-noprint" style={{ width: "100%", maxWidth: 860, margin: "44px 0 0" }}>
       <div style={{ textAlign: "center", color: "#fff", marginBottom: 18 }}>
         <div style={{ fontFamily: "'Sora'", fontWeight: 800, fontSize: 19 }}>{t.rsvp_title}</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,.62)" }}>{t.rsvp_sub}</div>
       </div>
       <div
         style={{

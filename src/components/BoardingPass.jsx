@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 import { generate } from "../lib/qr.js";
 
-export default function BoardingPass({ t, guest }) {
+const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -59,6 +59,7 @@ export default function BoardingPass({ t, guest }) {
 
   return (
     <div
+      ref={ref}
       className="cm-pass-wrap cm-pop"
       style={{
         animationDelay: ".1s",
@@ -108,8 +109,14 @@ export default function BoardingPass({ t, guest }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        <div style={{ flex: "2 1 440px", padding: "28px clamp(22px,3vw,34px)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", background: "#fff" }}>
+        <div
+          style={{
+            flex: "2 1 440px",
+            padding: "28px clamp(22px,3vw,34px)",
+            background: "#fff",
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -312,7 +319,9 @@ export default function BoardingPass({ t, guest }) {
       </div>
     </div>
   );
-}
+});
+
+export default BoardingPass;
 
 function stubCell(label, value) {
   return (

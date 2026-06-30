@@ -1,8 +1,45 @@
+import { useRef, useState } from "react";
+import { toPng } from "html-to-image";
 import BoardingPass from "./BoardingPass.jsx";
 import RsvpCards from "./RsvpCards.jsx";
 import { downloadIcs } from "../lib/guests.js";
 
 export default function BoardingView({ t, guest, onBack }) {
+  const passRef = useRef(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const onDownload = async () => {
+    if (!passRef.current || downloading) return;
+    setDownloading(true);
+    try {
+      const dataUrl = await toPng(passRef.current, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: "#06231C",
+        style: {
+          margin: "0",
+          animation: "none",
+          transform: "none",
+        },
+      });
+      const safeName = (guest?.name || "guest")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `boarding-pass-${safeName}.png`;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Failed to render boarding pass image", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <main
       style={{
@@ -60,7 +97,7 @@ export default function BoardingView({ t, guest, onBack }) {
         </p>
       </div>
 
-      <BoardingPass t={t} guest={guest} />
+      <BoardingPass ref={passRef} t={t} guest={guest} />
 
       <div
         className="cm-noprint"
@@ -74,10 +111,12 @@ export default function BoardingView({ t, guest, onBack }) {
       >
         <button
           type="button"
-          onClick={() => window.print()}
+          onClick={onDownload}
+          disabled={downloading}
           className="cm-btn-white"
           style={{
-            cursor: "pointer",
+            cursor: downloading ? "progress" : "pointer",
+            opacity: downloading ? 0.7 : 1,
             border: "none",
             borderRadius: 12,
             padding: "13px 22px",
@@ -92,7 +131,7 @@ export default function BoardingView({ t, guest, onBack }) {
             boxShadow: "0 10px 24px -12px rgba(0,0,0,.5)",
           }}
         >
-          ⬇ {t.btn_download}
+          ⬇ {downloading ? "..." : t.btn_download}
         </button>
         <button
           type="button"
