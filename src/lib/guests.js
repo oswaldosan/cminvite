@@ -14,11 +14,11 @@ function buildIcs(t) {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//CM Airlines//Evento 2027//ES",
+    "PRODID:-//CM Airlines//Evento 2026//ES",
     "BEGIN:VEVENT",
-    "UID:cm-airlines-2027@cmairlines.com",
-    "DTSTART:20270708T190000",
-    "DTEND:20270708T230000",
+    "UID:cm-airlines-2026@cmairlines.com",
+    "DTSTART:20260708T190000",
+    "DTEND:20260708T230000",
     `SUMMARY:${t.ics_summary}`,
     `DESCRIPTION:${t.slogan}`,
     "LOCATION:Aeropuerto Toncontin\\, Tegucigalpa",
@@ -27,7 +27,7 @@ function buildIcs(t) {
   ].join("\r\n");
 }
 
-export function downloadIcs(t, filename = "CM-Airlines-2027.ics") {
+export function downloadIcs(t, filename = "CM-Airlines-2026.ics") {
   const blob = new Blob([buildIcs(t)], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

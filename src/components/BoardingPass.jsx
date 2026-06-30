@@ -8,8 +8,8 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
     const c = canvasRef.current;
     if (!c || !guest) return;
     const payload =
-      `CM AIRLINES 2027|PAX:${(guest.name || "GUEST").toUpperCase()}` +
-      `|ID:${guest.id}|FLT:CM2027|DATE:08JUL2027|TONCONTIN|GATE:A8|SEAT:7J`;
+      `CM AIRLINES 2026|PAX:${(guest.name || "GUEST").toUpperCase()}` +
+      `|ID:${guest.id}|FLT:CM2026|DATE:08JUL2026|TONCONTIN|GATE:A8|SEAT:7J`;
     try {
       const res = generate(payload, "M");
       const n = res.size;
@@ -220,7 +220,7 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
               marginTop: 22,
             }}
           >
-            {detailCell(t.bp_flight, "CM 2027")}
+            {detailCell(t.bp_flight, "CM 2026")}
             {detailCell(t.bp_date, "08 JUL")}
             {detailCell(t.bp_boarding, "18:30")}
             {detailCell(t.bp_gate, "A8", "#0C9BA3")}
@@ -313,7 +313,7 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
             {stubCell(t.bp_seat, "7J")}
             {stubCell(t.bp_gate, "A8")}
             {stubCell(t.bp_seq, "027")}
-            {stubCell(t.bp_flight, "CM2027")}
+            {stubCell(t.bp_flight, "CM2026")}
           </div>
         </div>
       </div>

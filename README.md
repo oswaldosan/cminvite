@@ -1,4 +1,4 @@
-# CM Airlines · Invitación 2027
+# CM Airlines · Invitación 2026
 
 Single-page invitation app for the CM Airlines launch event. Guests confirm attendance with their ID number; if validated against the guest list, a digital boarding pass is issued (with QR code, calendar export, and printable view).
 
