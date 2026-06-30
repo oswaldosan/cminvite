@@ -98,7 +98,14 @@ export default function CheckinView({ t, lang, onConfirmed }) {
           </span>
         </h1>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, margin: "34px 0 0" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 10,
+            margin: "34px 0 0",
+          }}
+        >
           {[
             { icon: "🗓️", l: t.d_date_l, v: t.d_date_v },
             { icon: "🕖", l: t.d_time_l, v: t.d_time_v },

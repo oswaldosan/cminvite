@@ -17,16 +17,6 @@ export default function Header({ t, lang, onLang }) {
         style={{ height: 34, width: "auto", filter: "brightness(0) invert(1)" }}
       />
       <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-        <span
-          style={{
-            color: "rgba(255,255,255,.75)",
-            fontSize: 13,
-            fontWeight: 600,
-            letterSpacing: ".02em",
-          }}
-        >
-          {t.nav_help}
-        </span>
         <div
           style={{
             display: "flex",
