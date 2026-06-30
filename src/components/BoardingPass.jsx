@@ -173,7 +173,16 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
               >
                 CM
               </div>
-              <div style={{ fontSize: 12, color: "#7A8B86", fontWeight: 600, marginTop: 4 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "#7A8B86",
+                  fontWeight: 600,
+                  marginTop: 4,
+                  whiteSpace: "pre-line",
+                  lineHeight: 1.25,
+                }}
+              >
                 {t.bp_to_city}
               </div>
             </div>
