@@ -16,6 +16,10 @@
     { "id": "0506198800641", "nombre": "INDIRA FLORES", "empresa": "TRANSMUNDO" },
     { "id": "0501199104405", "nombre": "IVON ALFARO", "empresa": "D' MUNDO TRAVEL" },
     { "id": "0501196103826", "nombre": "MAUREEN SORAYA SAYBE", "empresa": "ALADIN TRAVEL" },
-    { "id": "0801197802084", "nombre": "ANTONIO MONCADA", "empresa": "MAYAN PRINCESS" }
+    { "id": "0801197802084", "nombre": "ANTONIO MONCADA", "empresa": "MAYAN PRINCESS" },
+    { "id": "042309201602030", "nombre": "NICOLE SCHNEIDER", "empresa": "PARADISE HOTELS", "email": "nicole.schneider@paradisehotels.com" },
+    { "id": "0880201500002", "nombre": "IVAN INAREJOS", "empresa": "FANTASY ISLAND", "email": "gm@roatanfantasy.com" },
+    { "id": "YB8796642", "nombre": "MARCO DIAGOSTINO", "empresa": "HENRY MORGAN", "email": "jolly@hmresorts.com" },
+    { "id": "YC6047069", "nombre": "PIETRO DIBASTISTA", "empresa": "HENRY MORGAN", "email": "piero@hmresorts.com" }
   ]
 }

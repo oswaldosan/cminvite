@@ -1,8 +1,12 @@
 import data from "../data/guests.json";
 
-// Canonical ID format is digits-only (e.g. "0502199200553").
-// Users may type dashes, spaces, dots, or any separator — we strip them.
-export const normalizeId = (s) => String(s || "").replace(/\D/g, "");
+// Normalize an ID for comparison: keep alphanumerics (so passport letters
+// like "YB8796642" are preserved), drop separators (dashes, spaces, dots),
+// and uppercase. National IDs typed with or without dashes still match.
+export const normalizeId = (s) =>
+  String(s || "")
+    .replace(/[^0-9a-zA-Z]/g, "")
+    .toUpperCase();
 
 export function findGuest(rawId) {
   const target = normalizeId(rawId);
