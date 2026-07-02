@@ -18,7 +18,7 @@ export function findGuest(rawId) {
 // 7:00 PM regardless of its timezone, which is what we want for an in-person event.
 const EVENT_START = "20260708T190000";
 const EVENT_END = "20260708T230000";
-const EVENT_LOCATION = "Aeropuerto Toncontín, Tegucigalpa";
+const EVENT_LOCATION = "Aeropuerto Toncontín, Hangar DIVESA, Tegucigalpa";
 
 // Escape per RFC 5545 (commas, semicolons, backslashes, newlines).
 const icsEscape = (s) =>

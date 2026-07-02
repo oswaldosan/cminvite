@@ -235,7 +235,7 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
             {detailCell(t.bp_gate, "A8", "#0C9BA3")}
             {detailCell(t.bp_seat, "7J")}
             {detailCell(t.bp_class, t.bp_class_v)}
-            {detailCell(t.bp_terminal, "Llegadas Nacionales")}
+            {detailCell(t.bp_terminal, "Hangar privado DIVESA")}
             {detailCell(t.bp_time, "19:00")}
           </div>
 
