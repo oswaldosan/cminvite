@@ -1,31 +1,26 @@
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import QRCode from "qrcode";
 
 const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
-  const canvasRef = useRef(null);
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
-    const c = canvasRef.current;
-    if (!c || !guest) return;
+    if (!guest) return;
     const payload =
       `CM AIRLINES 2026|PAX:${(guest.name || "GUEST").toUpperCase()}` +
       `|ID:${guest.id}|FLT:CM2026|DATE:08JUL2026|TONCONTIN|GATE:A8|SEAT:7J`;
-    // Standards-compliant QR (the previous custom generator produced codes
-    // that standard scanners could not decode).
-    // Render at high internal resolution, then pin the display size to 150px
-    // (toCanvas sets an inline style we need to override) so the QR stays
-    // crisp for scanning without blowing up the layout.
-    QRCode.toCanvas(c, payload, {
+    // Render a standards-compliant QR as a high-res PNG data URL; the <img>
+    // controls display size via CSS, so the internal resolution stays crisp
+    // for scanning without affecting layout. (The previous custom generator
+    // produced codes that standard scanners could not decode.)
+    QRCode.toDataURL(payload, {
       errorCorrectionLevel: "M",
       margin: 2,
       width: 512,
       color: { dark: "#0E3B2A", light: "#FFFFFF" },
     })
-      .then(() => {
-        c.style.width = "150px";
-        c.style.height = "150px";
-      })
-      .catch(() => {});
+      .then(setQrUrl)
+      .catch(() => setQrUrl(""));
   }, [guest]);
 
   const pax = guest?.name?.trim() ? guest.name.toUpperCase() : t.pax_guest;
@@ -289,12 +284,17 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
           >
             {t.bp_title}
           </div>
-          <canvas
-            ref={canvasRef}
-            width="150"
-            height="150"
-            style={{ margin: "16px 0 12px", width: 150, height: 150 }}
-          />
+          {qrUrl ? (
+            <img
+              src={qrUrl}
+              alt="QR de ingreso"
+              width={150}
+              height={150}
+              style={{ margin: "16px 0 12px", width: 150, height: 150, display: "block" }}
+            />
+          ) : (
+            <div style={{ width: 150, height: 150, margin: "16px 0 12px" }} />
+          )}
           <div
             style={{ fontSize: 11, color: "#7A8B86", fontWeight: 600, lineHeight: 1.4 }}
           >
