@@ -5,16 +5,34 @@ import CheckinView from "./components/CheckinView.jsx";
 import BoardingView from "./components/BoardingView.jsx";
 import { DICT } from "./lib/dict.js";
 
-// Scanner pulls in Firebase + the QR camera lib — load it only on #scan
-// so the guest-facing invitation stays light.
+// Staff-only routes pull in Firebase (+ the QR camera lib for the scanner) —
+// load them only on their hash routes so the guest invitation stays light.
 const ScannerView = lazy(() => import("./components/ScannerView.jsx"));
+const RaffleView = lazy(() => import("./components/RaffleView.jsx"));
 
-const isScanRoute = () => window.location.hash.replace(/^#\/?/, "").toLowerCase() === "scan";
+const currentRoute = () => window.location.hash.replace(/^#\/?/, "").toLowerCase();
+
+function StaffFallback({ label }) {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "#06231C",
+        color: "#fff",
+        fontFamily: "'Manrope',system-ui,sans-serif",
+      }}
+    >
+      {label}
+    </div>
+  );
+}
 
 export default function App() {
   const [lang, setLang] = useState("es");
   const [guest, setGuest] = useState(null);
-  const [scan, setScan] = useState(isScanRoute());
+  const [route, setRoute] = useState(currentRoute());
   const t = DICT[lang];
 
   useEffect(() => {
@@ -26,31 +44,23 @@ export default function App() {
   }, [guest]);
 
   useEffect(() => {
-    const onHash = () => setScan(isScanRoute());
+    const onHash = () => setRoute(currentRoute());
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  // Staff-only scanner route (#scan) — not linked from the invitation.
-  if (scan) {
+  // Staff-only routes — not linked from the invitation.
+  if (route === "scan") {
     return (
-      <Suspense
-        fallback={
-          <div
-            style={{
-              minHeight: "100vh",
-              display: "grid",
-              placeItems: "center",
-              background: "#06231C",
-              color: "#fff",
-              fontFamily: "'Manrope',system-ui,sans-serif",
-            }}
-          >
-            Cargando escáner…
-          </div>
-        }
-      >
+      <Suspense fallback={<StaffFallback label="Cargando escáner…" />}>
         <ScannerView />
+      </Suspense>
+    );
+  }
+  if (route === "raffle" || route === "rifa") {
+    return (
+      <Suspense fallback={<StaffFallback label="Cargando rifa…" />}>
+        <RaffleView />
       </Suspense>
     );
   }

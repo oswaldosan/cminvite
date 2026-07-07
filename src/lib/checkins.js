@@ -40,6 +40,30 @@ export function subscribeCheckinCount(onCount) {
   return onSnapshot(collection(db, COLLECTION), (snap) => onCount(snap.size));
 }
 
+// Live subscription to the full list of confirmed check-ins.
+export function subscribeCheckins(onList) {
+  return onSnapshot(collection(db, COLLECTION), (snap) => {
+    const list = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        key: d.id,
+        identidad: data.identidad || d.id,
+        nombre: data.nombre || "",
+        empresa: data.empresa || "",
+      };
+    });
+    onList(list);
+  });
+}
+
+// Raffle eligibility: CM Airlines employees and event staff do not participate.
+export function isRaffleEligible(empresa) {
+  const e = String(empresa || "").toUpperCase().replace(/\s+/g, " ").trim();
+  if (e === "STAFF") return false;
+  if (/^CM ?AIR/.test(e)) return false; // matches "CM AIRLINES" and the "CM AIRLIINES" typo
+  return true;
+}
+
 export function formatCheckinTime(value) {
   if (!value) return "";
   const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
