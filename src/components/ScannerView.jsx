@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import { findGuest } from "../lib/guests.js";
 import { parseQrPayload } from "../lib/qrPayload.js";
 import { recordCheckin, subscribeCheckinCount, formatCheckinTime } from "../lib/checkins.js";
@@ -63,27 +63,12 @@ export default function ScannerView() {
 
   async function startScanner() {
     setCamError("");
-    const scanner = new Html5Qrcode(REGION_ID, {
-      verbose: false,
-      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-      // Use the device's native, hardware-accelerated barcode reader when
-      // available (Android Chrome) — far more reliable on dense QR codes.
-      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-    });
+    const scanner = new Html5Qrcode(REGION_ID, { verbose: false });
     scannerRef.current = scanner;
     try {
       await scanner.start(
-        // Request a higher-resolution rear camera so dense QR codes resolve.
-        { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-        {
-          fps: 10,
-          // Responsive scan box: 75% of the smaller video dimension.
-          qrbox: (vw, vh) => {
-            const size = Math.floor(Math.min(vw, vh) * 0.75);
-            return { width: size, height: size };
-          },
-          aspectRatio: 1.0,
-        },
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         handleDecoded,
         () => {}
       );
