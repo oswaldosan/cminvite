@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// CM Airlines event check-in rules.
+// The app has no authentication, so the scanner writes to `checkins`
+// unauthenticated. This is acceptable for a short, private event but means
+// anyone with the project config could write. Tighten (Anonymous Auth /
+// App Check) if you need stronger guarantees.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /checkins/{id} {
+      allow read: if true;
+      // Create a check-in once; do not allow overwriting an existing entry.
+      allow create: if request.resource.data.keys().hasOnly(
+        ['identidad', 'nombre', 'empresa', 'method', 'checkedInAt']
+      );
+      allow update, delete: if false;
+    }
+  }
+}
