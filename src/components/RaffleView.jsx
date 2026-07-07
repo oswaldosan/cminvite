@@ -31,12 +31,25 @@ export default function RaffleView() {
     [all, excludedKeys]
   );
 
+  // Shuffle the wheel order (Fisher-Yates, crypto) so names aren't in a fixed
+  // Firestore order — reshuffles only when the eligible set changes.
+  const eligibleSig = participants.map((p) => p.key).sort().join(",");
+  const wheelOrder = useMemo(() => {
+    const arr = participants.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = secureRandomInt(i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eligibleSig]);
+
   const excludedByRule = all.length - all.filter((g) => isRaffleEligible(g.empresa)).length;
 
   useEffect(() => {
     drawWheel(rotationRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [participants.length]);
+  }, [wheelOrder]);
 
   function drawWheel(rotation) {
     const c = canvasRef.current;
@@ -46,7 +59,7 @@ export default function RaffleView() {
     const cx = size / 2;
     const cy = size / 2;
     const r = size / 2 - 4;
-    const n = participants.length;
+    const n = wheelOrder.length;
     ctx.clearRect(0, 0, size, size);
 
     if (n === 0) {
@@ -58,7 +71,7 @@ export default function RaffleView() {
     }
 
     const seg = TAU / n;
-    const showNames = n <= 30;
+    const showNames = n <= 40;
     for (let i = 0; i < n; i++) {
       const start = rotation + i * seg;
       ctx.beginPath();
@@ -77,20 +90,20 @@ export default function RaffleView() {
         ctx.rotate(start + seg / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
-        ctx.font = "600 13px 'Manrope',sans-serif";
-        const name = participants[i].nombre.split(" ").slice(0, 2).join(" ");
-        ctx.fillText(name.length > 18 ? name.slice(0, 17) + "…" : name, r - 12, 4);
+        ctx.font = "600 18px 'Manrope',sans-serif";
+        const name = wheelOrder[i].nombre.split(" ").slice(0, 2).join(" ");
+        ctx.fillText(name.length > 18 ? name.slice(0, 17) + "…" : name, r - 18, 6);
         ctx.restore();
       }
     }
 
     // hub
     ctx.beginPath();
-    ctx.arc(cx, cy, 26, 0, TAU);
+    ctx.arc(cx, cy, 40, 0, TAU);
     ctx.fillStyle = "#fff";
     ctx.fill();
     ctx.fillStyle = "#0E3B2A";
-    ctx.font = "800 18px 'Sora',sans-serif";
+    ctx.font = "800 26px 'Sora',sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("CM", cx, cy);
@@ -98,7 +111,7 @@ export default function RaffleView() {
   }
 
   function spin() {
-    const n = participants.length;
+    const n = wheelOrder.length;
     if (spinning || n === 0) return;
     setWinner(null);
     setSpinning(true);
@@ -106,16 +119,17 @@ export default function RaffleView() {
     const winnerIdx = secureRandomInt(n);
     const seg = TAU / n;
     // Pointer sits at the top (−90° = 3π/2). Rotate so the winner segment
-    // centre lands under the pointer, plus several full turns for effect.
-    const target =
-      (3 * TAU) / 4 - (winnerIdx * seg + seg / 2);
-    const fullTurns = (5 + secureRandomInt(3)) * TAU;
+    // centre lands under the pointer, plus a random extra offset within the
+    // segment and many full turns so every spin looks different.
+    const jitter = (secureRandomInt(1000) / 1000 - 0.5) * seg * 0.8;
+    const target = (3 * TAU) / 4 - (winnerIdx * seg + seg / 2) + jitter;
+    const fullTurns = (8 + secureRandomInt(7)) * TAU; // 8–14 full turns
     const start = rotationRef.current % TAU;
     const end = target + fullTurns;
-    const duration = 5200;
+    const duration = 5600 + secureRandomInt(2600); // 5.6–8.2s
     let t0 = null;
 
-    const ease = (x) => 1 - Math.pow(1 - x, 3); // easeOutCubic
+    const ease = (x) => 1 - Math.pow(1 - x, 4); // easeOutQuart — long dramatic slow-down
 
     function frame(ts) {
       if (t0 == null) t0 = ts;
@@ -126,7 +140,7 @@ export default function RaffleView() {
         rafRef.current = requestAnimationFrame(frame);
       } else {
         setSpinning(false);
-        setWinner(participants[winnerIdx]);
+        setWinner(wheelOrder[winnerIdx]);
       }
     }
     rafRef.current = requestAnimationFrame(frame);
@@ -152,41 +166,41 @@ export default function RaffleView() {
         alignItems: "center",
       }}
     >
-      <div style={{ width: "100%", maxWidth: 520, textAlign: "center" }}>
-        <div style={{ fontFamily: "'Sora'", fontWeight: 800, fontSize: 22 }}>Rifa CM Airlines</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,.7)", marginTop: 4 }}>
+      <div style={{ width: "100%", maxWidth: 780, textAlign: "center" }}>
+        <div style={{ fontFamily: "'Sora'", fontWeight: 800, fontSize: 26 }}>Rifa CM Airlines</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,.7)", marginTop: 4 }}>
           {participants.length} participantes elegibles
           {excludedByRule > 0 ? ` · ${excludedByRule} excluidos (CM Airlines / Staff)` : ""}
           {excludedKeys.size > 0 ? ` · ${excludedKeys.size} ya ganaron` : ""}
         </div>
 
         {/* Wheel + pointer */}
-        <div style={{ position: "relative", width: "min(88vw, 420px)", margin: "24px auto 0" }}>
+        <div style={{ position: "relative", width: "min(96vw, 680px)", margin: "28px auto 0" }}>
           <div
             style={{
               position: "absolute",
-              top: -6,
+              top: -8,
               left: "50%",
               transform: "translateX(-50%)",
               width: 0,
               height: 0,
-              borderLeft: "16px solid transparent",
-              borderRight: "16px solid transparent",
-              borderTop: "26px solid #F5C518",
+              borderLeft: "22px solid transparent",
+              borderRight: "22px solid transparent",
+              borderTop: "36px solid #F5C518",
               zIndex: 2,
-              filter: "drop-shadow(0 3px 4px rgba(0,0,0,.4))",
+              filter: "drop-shadow(0 3px 5px rgba(0,0,0,.45))",
             }}
           />
           <canvas
             ref={canvasRef}
-            width={640}
-            height={640}
+            width={1000}
+            height={1000}
             style={{
               width: "100%",
               height: "auto",
               display: "block",
               borderRadius: "50%",
-              boxShadow: "0 30px 70px -30px rgba(0,0,0,.7)",
+              boxShadow: "0 34px 80px -30px rgba(0,0,0,.7)",
             }}
           />
         </div>
