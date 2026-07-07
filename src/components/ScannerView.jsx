@@ -18,36 +18,55 @@ export default function ScannerView() {
   const scannerRef = useRef(null);
   const lastScanRef = useRef({ value: "", at: 0 });
   const busyRef = useRef(false);
+  const pendingRef = useRef(null);
 
   const [running, setRunning] = useState(false);
   const [camError, setCamError] = useState("");
   const [result, setResult] = useState(null); // { type, guest, at, detail }
+  const [pending, setPending] = useState(null); // guest awaiting confirmation
+  const [saving, setSaving] = useState(false);
   const [count, setCount] = useState(null);
   const [manualId, setManualId] = useState("");
 
   useEffect(() => subscribeCheckinCount(setCount), []);
 
-  async function handleDecoded(text) {
+  function handleDecoded(text) {
     const now = Date.now();
-    if (busyRef.current) return;
+    // Ignore new scans while busy or while a confirmation is pending.
+    if (busyRef.current || pendingRef.current) return;
     if (lastScanRef.current.value === text && now - lastScanRef.current.at < SCAN_COOLDOWN_MS) return;
     lastScanRef.current = { value: text, at: now };
     busyRef.current = true;
-    try {
-      await processId(parseQrPayload(text).id, text);
-    } finally {
-      setTimeout(() => {
-        busyRef.current = false;
-      }, 900);
-    }
+    stageId(parseQrPayload(text).id, text);
   }
 
-  async function processId(normId, rawLabel) {
+  // Look up the guest and stage them for confirmation — does NOT write yet.
+  function stageId(normId, rawLabel) {
     const guest = findGuest(normId);
     if (!guest) {
       setResult({ type: "invalid", detail: rawLabel || normId });
+      setTimeout(() => {
+        busyRef.current = false;
+      }, 900);
       return;
     }
+    setResult(null);
+    pendingRef.current = guest;
+    setPending(guest);
+    // busyRef stays true until the staff confirms or cancels.
+  }
+
+  function cancelPending() {
+    pendingRef.current = null;
+    setPending(null);
+    busyRef.current = false;
+    lastScanRef.current = { value: "", at: 0 };
+  }
+
+  async function confirmPending() {
+    const guest = pendingRef.current;
+    if (!guest || saving) return;
+    setSaving(true);
     try {
       const res = await recordCheckin(guest, "qr");
       setResult({
@@ -58,6 +77,9 @@ export default function ScannerView() {
     } catch (err) {
       console.error("checkin error", err);
       setResult({ type: "error", guest, detail: err?.message || "" });
+    } finally {
+      setSaving(false);
+      cancelPending();
     }
   }
 
@@ -105,8 +127,8 @@ export default function ScannerView() {
   function submitManual(e) {
     e.preventDefault();
     const val = manualId.trim();
-    if (!val) return;
-    processId(parseQrPayload(val).id || val.replace(/[^0-9a-zA-Z]/g, "").toUpperCase(), val);
+    if (!val || pendingRef.current) return;
+    stageId(parseQrPayload(val).id || val.replace(/[^0-9a-zA-Z]/g, "").toUpperCase(), val);
     setManualId("");
   }
 
@@ -151,8 +173,95 @@ export default function ScannerView() {
           </div>
         </div>
 
+        {/* Confirmation card — shown after a scan/manual lookup, before writing */}
+        {pending ? (
+          <div
+            style={{
+              background: "#fff",
+              color: "#0B2A22",
+              borderRadius: 16,
+              padding: "20px",
+              marginBottom: 16,
+              boxShadow: "0 18px 40px -18px rgba(0,0,0,.6)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: ".12em",
+                textTransform: "uppercase",
+                color: "#8AA39B",
+                fontWeight: 700,
+              }}
+            >
+              Confirmar ingreso
+            </div>
+            <div
+              style={{
+                fontFamily: "'Sora'",
+                fontWeight: 800,
+                fontSize: 20,
+                marginTop: 6,
+                textTransform: "uppercase",
+                lineHeight: 1.15,
+              }}
+            >
+              {pending.nombre}
+            </div>
+            {pending.empresa ? (
+              <div style={{ fontSize: 13, color: "#0C9BA3", fontWeight: 700, marginTop: 2 }}>
+                {pending.empresa}
+              </div>
+            ) : null}
+            <div style={{ fontSize: 13, color: "#5A6B66", marginTop: 6 }}>
+              ID: {pending.id}
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+              <button
+                type="button"
+                onClick={confirmPending}
+                disabled={saving}
+                style={{
+                  flex: 2,
+                  cursor: saving ? "progress" : "pointer",
+                  opacity: saving ? 0.7 : 1,
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "14px",
+                  fontFamily: "'Sora'",
+                  fontWeight: 800,
+                  fontSize: 15,
+                  color: "#fff",
+                  background: "linear-gradient(100deg,#0E7C4B,#0E3B2A)",
+                }}
+              >
+                {saving ? "Registrando…" : "✓ Confirmar ingreso"}
+              </button>
+              <button
+                type="button"
+                onClick={cancelPending}
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  cursor: "pointer",
+                  border: "1.5px solid #DCE4E1",
+                  borderRadius: 12,
+                  padding: "14px",
+                  fontFamily: "'Sora'",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  color: "#5A6B66",
+                  background: "#fff",
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {/* Result banner */}
-        {rs ? (
+        {!pending && rs ? (
           <div
             style={{
               background: rs.bg,
