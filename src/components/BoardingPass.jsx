@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useRef } from "react";
-import { generate } from "../lib/qr.js";
+import QRCode from "qrcode";
 
 const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
   const canvasRef = useRef(null);
@@ -10,29 +10,14 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
     const payload =
       `CM AIRLINES 2026|PAX:${(guest.name || "GUEST").toUpperCase()}` +
       `|ID:${guest.id}|FLT:CM2026|DATE:08JUL2026|TONCONTIN|GATE:A8|SEAT:7J`;
-    try {
-      const res = generate(payload, "M");
-      const n = res.size;
-      const quiet = 2;
-      const total = n + quiet * 2;
-      const scale = Math.max(2, Math.floor(168 / total));
-      const px = scale * total;
-      c.width = px;
-      c.height = px;
-      c.style.width = `${px}px`;
-      c.style.height = `${px}px`;
-      const ctx = c.getContext("2d");
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, px, px);
-      ctx.fillStyle = "#0E3B2A";
-      for (let y = 0; y < n; y++) {
-        for (let x = 0; x < n; x++) {
-          if (res.modules[y][x]) ctx.fillRect((x + quiet) * scale, (y + quiet) * scale, scale, scale);
-        }
-      }
-    } catch {
-      /* ignore */
-    }
+    // Standards-compliant QR (the previous custom generator produced codes
+    // that standard scanners could not decode).
+    QRCode.toCanvas(c, payload, {
+      errorCorrectionLevel: "M",
+      margin: 2,
+      width: 168,
+      color: { dark: "#0E3B2A", light: "#FFFFFF" },
+    }).catch(() => {});
   }, [guest]);
 
   const pax = guest?.name?.trim() ? guest.name.toUpperCase() : t.pax_guest;
