@@ -12,14 +12,20 @@ const BoardingPass = forwardRef(function BoardingPass({ t, guest }, ref) {
       `|ID:${guest.id}|FLT:CM2026|DATE:08JUL2026|TONCONTIN|GATE:A8|SEAT:7J`;
     // Standards-compliant QR (the previous custom generator produced codes
     // that standard scanners could not decode).
-    // Render at high internal resolution (CSS scales the canvas down to 150px)
-    // so the QR stays crisp and scans reliably off a phone screen.
+    // Render at high internal resolution, then pin the display size to 150px
+    // (toCanvas sets an inline style we need to override) so the QR stays
+    // crisp for scanning without blowing up the layout.
     QRCode.toCanvas(c, payload, {
       errorCorrectionLevel: "M",
       margin: 2,
       width: 512,
       color: { dark: "#0E3B2A", light: "#FFFFFF" },
-    }).catch(() => {});
+    })
+      .then(() => {
+        c.style.width = "150px";
+        c.style.height = "150px";
+      })
+      .catch(() => {});
   }, [guest]);
 
   const pax = guest?.name?.trim() ? guest.name.toUpperCase() : t.pax_guest;
