@@ -50,6 +50,7 @@ export function subscribeCheckins(onList) {
         identidad: data.identidad || d.id,
         nombre: data.nombre || "",
         empresa: data.empresa || "",
+        at: data.checkedInAt || null,
       };
     });
     onList(list);

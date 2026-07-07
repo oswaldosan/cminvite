@@ -9,6 +9,7 @@ import { DICT } from "./lib/dict.js";
 // load them only on their hash routes so the guest invitation stays light.
 const ScannerView = lazy(() => import("./components/ScannerView.jsx"));
 const RaffleView = lazy(() => import("./components/RaffleView.jsx"));
+const ListView = lazy(() => import("./components/ListView.jsx"));
 
 const currentRoute = () => window.location.hash.replace(/^#\/?/, "").toLowerCase();
 
@@ -61,6 +62,13 @@ export default function App() {
     return (
       <Suspense fallback={<StaffFallback label="Cargando rifa…" />}>
         <RaffleView />
+      </Suspense>
+    );
+  }
+  if (route === "list" || route === "confirmados") {
+    return (
+      <Suspense fallback={<StaffFallback label="Cargando lista…" />}>
+        <ListView />
       </Suspense>
     );
   }
