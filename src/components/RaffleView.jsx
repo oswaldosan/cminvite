@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { subscribeCheckins, isRaffleEligible } from "../lib/checkins.js";
+import { subscribeCheckins, raffleCategory, RAFFLE_CATEGORIES } from "../lib/checkins.js";
 
 const SEGMENT_COLORS = ["#0C9BA3", "#0E3B2A", "#16BCC4", "#0E7C4B", "#14776B", "#86C440"];
 const TAU = Math.PI * 2;
@@ -14,6 +14,7 @@ function secureRandomInt(n) {
 export default function RaffleView() {
   const [all, setAll] = useState([]);
   const [excludedKeys, setExcludedKeys] = useState(() => new Set()); // past winners
+  const [category, setCategory] = useState("agencias");
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
   const canvasRef = useRef(null);
@@ -22,13 +23,24 @@ export default function RaffleView() {
 
   useEffect(() => subscribeCheckins(setAll), []);
 
-  // Eligible = confirmed check-in, not CM Airlines/Staff, not already a winner.
+  // Confirmed check-ins tagged with their raffle category (null = excluded).
+  const tagged = useMemo(
+    () => all.map((g) => ({ ...g, cat: raffleCategory(g.empresa) })),
+    [all]
+  );
+
+  const counts = useMemo(() => {
+    const c = { agencias: 0, prensa: 0, influencers: 0 };
+    tagged.forEach((g) => {
+      if (g.cat && c[g.cat] != null) c[g.cat] += 1;
+    });
+    return c;
+  }, [tagged]);
+
+  // Eligible = selected category, not already a winner.
   const participants = useMemo(
-    () =>
-      all
-        .filter((g) => isRaffleEligible(g.empresa))
-        .filter((g) => !excludedKeys.has(g.key)),
-    [all, excludedKeys]
+    () => tagged.filter((g) => g.cat === category).filter((g) => !excludedKeys.has(g.key)),
+    [tagged, category, excludedKeys]
   );
 
   // Shuffle the wheel order (Fisher-Yates, crypto) so names aren't in a fixed
@@ -44,7 +56,13 @@ export default function RaffleView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eligibleSig]);
 
-  const excludedByRule = all.length - all.filter((g) => isRaffleEligible(g.empresa)).length;
+  // Reset winner + wheel when switching category.
+  function changeCategory(next) {
+    if (spinning || next === category) return;
+    setWinner(null);
+    rotationRef.current = 0;
+    setCategory(next);
+  }
 
   useEffect(() => {
     drawWheel(rotationRef.current);
@@ -168,9 +186,48 @@ export default function RaffleView() {
     >
       <div style={{ width: "100%", maxWidth: 780, textAlign: "center" }}>
         <div style={{ fontFamily: "'Sora'", fontWeight: 800, fontSize: 26 }}>Rifa CM Airlines</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,.7)", marginTop: 4 }}>
+
+        {/* Category tabs */}
+        <div
+          style={{
+            display: "inline-flex",
+            gap: 4,
+            marginTop: 14,
+            background: "rgba(255,255,255,.1)",
+            border: "1px solid rgba(255,255,255,.18)",
+            borderRadius: 999,
+            padding: 4,
+            backdropFilter: "blur(6px)",
+          }}
+        >
+          {RAFFLE_CATEGORIES.map((c) => {
+            const active = category === c.key;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => changeCategory(c.key)}
+                disabled={spinning}
+                style={{
+                  cursor: spinning ? "not-allowed" : "pointer",
+                  border: "none",
+                  borderRadius: 999,
+                  padding: "9px 16px",
+                  fontFamily: "'Sora'",
+                  fontWeight: 700,
+                  fontSize: 13.5,
+                  color: active ? "#0E3B2A" : "rgba(255,255,255,.85)",
+                  background: active ? "#fff" : "transparent",
+                }}
+              >
+                {c.label} · {counts[c.key]}
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,.7)", marginTop: 12 }}>
           {participants.length} participantes elegibles
-          {excludedByRule > 0 ? ` · ${excludedByRule} excluidos (CM Airlines / Staff)` : ""}
           {excludedKeys.size > 0 ? ` · ${excludedKeys.size} ya ganaron` : ""}
         </div>
 

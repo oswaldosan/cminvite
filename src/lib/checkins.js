@@ -65,6 +65,25 @@ export function isRaffleEligible(empresa) {
   return true;
 }
 
+// Press outlets go in the "Prensa" raffle group.
+const PRENSA = new Set(["ICN", "TVC", "TV", "TSI", "ESTILO", "ESTIILO"]);
+
+// Raffle category for an empresa:
+//   "influencers" | "prensa" | "agencias" | null (excluded: CM Airlines / Staff)
+export function raffleCategory(empresa) {
+  const e = String(empresa || "").toUpperCase().replace(/\s+/g, " ").trim();
+  if (e === "STAFF" || /^CM ?AIR/.test(e)) return null;
+  if (e === "INFLUENCER") return "influencers";
+  if (PRENSA.has(e)) return "prensa";
+  return "agencias";
+}
+
+export const RAFFLE_CATEGORIES = [
+  { key: "agencias", label: "Agencias" },
+  { key: "prensa", label: "Prensa" },
+  { key: "influencers", label: "Influencers" },
+];
+
 export function formatCheckinTime(value) {
   if (!value) return "";
   const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
